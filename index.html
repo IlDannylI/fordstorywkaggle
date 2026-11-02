@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How fast does a used Ford lose its value?</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <button class="btn theme-btn" id="theme-btn" aria-label="Switch between light and dark theme">Dark theme</button>
+  <h1>How fast does a used Ford lose its value?</h1>
+  <p class="lede">
+    <strong>17,715 used Fords</strong> from one listing snapshot give us a cross-section of the market: cars of every age, mileage and engine,
+    each with an asking price. We use them to ask what actually drives the price, how much comes from <strong>age</strong>
+    versus <strong>mileage</strong> versus the <strong>car itself</strong>, and where a simple model stops being trustworthy.
+  </p>
+</header>
+
+<div class="filterbar" id="filterbar" role="region" aria-label="Filters that apply to every view">
+  <div class="filterbar-inner">
+    <div class="fgroup">
+      <span class="flabel" id="models-label">Models to compare (up to 3)</span>
+      <div class="chips" id="model-chips" aria-labelledby="models-label"></div>
+      <select id="model-add" aria-label="Add a model"></select>
+    </div>
+    <div class="fgroup"><label for="f-fuel">Fuel</label>
+      <select id="f-fuel"><option value="">All</option><option>Petrol</option><option>Diesel</option></select></div>
+    <div class="fgroup"><label for="f-trans">Gearbox</label>
+      <select id="f-trans"><option value="">All</option><option>Manual</option><option>Automatic</option><option>Semi-Auto</option></select></div>
+    <div class="fgroup"><span class="flabel">Age (years)</span>
+      <input class="num" id="f-age-min" type="number" min="0" max="12" step="1" aria-label="Minimum age">
+      <span class="flabel">to</span>
+      <input class="num" id="f-age-max" type="number" min="0" max="12" step="1" aria-label="Maximum age"></div>
+    <span class="spacer"></span>
+    <span class="flabel" id="match-count" aria-live="polite"></span>
+    <button class="btn" id="reset-all">Reset everything</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ======================= BEGINNING: question and context ======================= -->
+  <div class="act">
+    <h2>Beginning: what does a Ford lose as it ages?</h2>
+    <p>Press play and watch the median asking price fall as cars get older. Grey lines are every other model. The coloured lines
+      are the models you picked in the filter bar; they keep their colour in every view.</p>
+  </div>
+
+  <section class="view" id="v1" aria-labelledby="v1-title">
+    <div class="view-head"><span class="view-num">View 1</span><h3 id="v1-title">The depreciation curve, drawn year by year</h3>
+      <p>How much of its price does a typical car of each model keep as it gets older?</p></div>
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn primary" id="v1-play" aria-label="Play or pause the animation">Play</button>
+        <button class="btn" id="v1-back" aria-label="Back one year">&minus; 1 yr</button>
+        <button class="btn" id="v1-fwd" aria-label="Forward one year">+ 1 yr</button>
+        <div class="group"><label for="v1-scrub">Age shown</label><input type="range" id="v1-scrub" min="0" max="10" step="0.05" value="10"><output id="v1-age-out"></output></div>
+        <div class="group">Show
+          <div class="seg" role="group" aria-label="Value shown"><button id="v1-m-price" aria-pressed="true">Price (£)</button><button id="v1-m-pct" aria-pressed="false">% of year-1 price</button></div></div>
+      </div>
+      <div class="chart" id="v1-chart"></div>
+      <div class="legend" id="v1-legend"></div>
+      <div class="readouts" id="v1-tiles"></div>
+      <details class="table-view"><summary>Show the numbers as a table</summary><div class="tbl-scroll" id="v1-table"></div></details>
+    </div>
+    <div class="notes">
+      <div><h4>What it shows</h4><p>Median asking price of cars at each age. A model's line stops where fewer than 15 cars exist at an age, because a median of a handful of cars is noise.</p></div>
+      <div><h4>How it is built</h4><p>Cars are grouped by model and age (2020 minus model year). The median of each group is drawn with D3 as an SVG line. The cursor reveals the lines progressively.</p></div>
+      <div><h4>Why this form</h4><p>A line over age is the natural shape for change over time. Medians resist the few very expensive cars. The "% of year-1 price" toggle puts cheap and dear models on one comparable scale.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================= MIDDLE: mechanism ======================= -->
+  <div class="act">
+    <h2>Middle: what is behind the curve?</h2>
+    <p>Age and mileage rise together (they correlate at 0.72 in this data), so the curve in View 1 mixes the two. Views 2 and 3 pull
+      them apart; Views 4 and 5 let you change one thing at a time.</p>
+  </div>
+
+  <section class="view" id="v2" aria-labelledby="v2-title">
+    <div class="view-head"><span class="view-num">View 2</span><h3 id="v2-title">Every car in three dimensions</h3>
+      <p>Where do cars sit in age, mileage and price at once, and what does a simple age-and-mileage model draw through them?</p></div>
+    <div class="card">
+      <div class="toolbar">
+        <div class="group">Colour by
+          <div class="seg" role="group" aria-label="Colour by"><button data-c="model">Model</button><button data-c="fuel">Fuel</button><button data-c="trans">Gearbox</button><button data-c="eng">Engine size</button></div></div>
+        <div class="group">View
+          <div class="seg" role="group" aria-label="Camera presets"><button data-p="3d">3D</button><button data-p="age">Age&ndash;price</button><button data-p="mile">Mileage&ndash;price</button><button data-p="top">Age&times;mileage</button></div></div>
+        <button class="btn" id="v2-rot" aria-pressed="false">Rotate</button>
+        <label class="group"><input type="checkbox" id="v2-surface"> Fitted surface (age + mileage only)</label>
+      </div>
+      <div class="chart" id="v2-chart"></div>
+      <div class="legend" id="v2-legend"></div>
+      <p class="panel-sub" id="v2-foot" style="margin-top:8px"></p>
+    </div>
+    <div class="notes">
+      <div><h4>What it shows</h4><p>One dot per listing. Drag to rotate, scroll to zoom, hover to read a car's values, click a car to load it into Views 4 and 5.</p></div>
+      <div><h4>How it is built</h4><p>A hand-written 3D projection on an HTML canvas: rotation matrices, light perspective and a point-picking search. The surface is the age + mileage model from the prep step, drawn as a wireframe.</p></div>
+      <div><h4>Why 3D</h4><p>Three variables at once. The "Age&times;mileage" preset shows how tightly they travel together; the surface shows that the two alone leave a wide cloud of unexplained price.</p></div>
+    </div>
+  </section>
+
+  <section class="view" id="v3" aria-labelledby="v3-title">
+    <div class="view-head"><span class="view-num">View 3</span><h3 id="v3-title">Comparing price distributions between scenarios</h3>
+      <p>Are two groups of cars really priced differently, or just differently spread?</p></div>
+    <div class="card">
+      <div class="toolbar">
+        <div class="group">Compare
+          <div class="seg" role="group" aria-label="Group cars by"><button data-g="model">Models picked above</button><button data-g="fuel">Petrol vs diesel</button><button data-g="trans">Gearboxes</button></div></div>
+      </div>
+      <div class="chart" id="v3-chart"></div>
+      <div class="legend" id="v3-legend"></div>
+      <div class="tbl-scroll" id="v3-table"></div>
+    </div>
+    <div class="notes">
+      <div><h4>What it shows</h4><p>The share of cars at each price, one curve per group, for the cars that pass the filter bar. Hover to count cars near a price.</p></div>
+      <div><h4>How it is built</h4><p>A Gaussian kernel density with a fixed &pound;800 bandwidth, computed in the browser for each group, plus the median and quartiles of each group.</p></div>
+      <div><h4>Why this form</h4><p>Overlapping densities show spread and overlap that a pair of averages hides. A fixed bandwidth keeps groups comparable.</p></div>
+    </div>
+  </section>
+
+  <section class="view" id="v4" aria-labelledby="v4-title">
+    <div class="view-head"><span class="view-num">View 4</span><h3 id="v4-title">Build a car and see what moves its price</h3>
+      <p>Change one thing at a time. Which features add value and which take it away, compared with a typical Fiesta?</p></div>
+    <div class="card">
+      <div class="whatif">
+        <div class="controls" id="v4-controls"></div>
+        <div>
+          <div class="hero"><span class="big" id="v4-price">&nbsp;</span><span class="band" id="v4-band"></span></div>
+          <div class="evidence" id="v4-evidence"></div>
+          <div class="chart" id="v4-chart"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <div><h4>What it shows</h4><p>The model's price estimate for the car you build, and a bar per feature: by what percentage that feature moves the price relative to the typical Fiesta.</p></div>
+      <div><h4>How it is built</h4><p>A regression of ln(price) on age, mileage, engine, mpg, tax, gearbox, fuel and model. Each bar is exp(coefficient &times; change): a multiplier, so bars do not depend on order.</p></div>
+      <div><h4>Honest limits</h4><p>The band is where 80% of training errors fell. "Similar cars" counts real listings near your settings; if there are none, the estimate is extrapolation and is flagged.</p></div>
+    </div>
+  </section>
+
+  <section class="view" id="v5" aria-labelledby="v5-title">
+    <div class="view-head"><span class="view-num">View 5</span><h3 id="v5-title">Slide the car along age and mileage</h3>
+      <p>Holding everything else fixed, how much does one more year, or 10,000 more miles, cost?</p></div>
+    <div class="card">
+      <div class="two-up">
+        <div><p class="panel-title" id="v5-a-title"></p><p class="panel-sub" id="v5-a-sub"></p><div class="chart" id="v5-a"></div></div>
+        <div><p class="panel-title" id="v5-b-title"></p><p class="panel-sub" id="v5-b-sub"></p><div class="chart" id="v5-b"></div></div>
+      </div>
+      <div class="legend"><span><i style="border-color:var(--s1)"></i>Model estimate for the car from View 4</span>
+        <span><i class="dot" style="background:var(--s1);opacity:.18"></i>80% band of past errors</span>
+        <span><i class="dot" style="background:var(--ink-3);opacity:.5"></i>Real cars of the same model and fuel (sample)</span></div>
+    </div>
+    <div class="notes">
+      <div><h4>What it shows</h4><p>The same car, re-priced as one variable sweeps across its range. The dot is the car you built in View 4 (or clicked in View 2 or 6).</p></div>
+      <div><h4>How it is built</h4><p>The model is evaluated 60 times along each axis with the other variables held at the car's values. Grey dots are a deterministic sample of real cars of that model and fuel.</p></div>
+      <div><h4>Read with care</h4><p>Real cars vary in engine and economy too, so the dots are a looser cloud than the line. Where there are no dots, the line is extrapolating.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================= ENDING: evidence, insights, limitations ======================= -->
+  <div class="act">
+    <h2>Ending: how much can we trust it?</h2>
+    <p>A model is evidence only if it is judged on cars it has not seen. 20% of the cars were held back, and every number below uses them.</p>
+  </div>
+
+  <section class="view" id="v6" aria-labelledby="v6-title">
+    <div class="view-head"><span class="view-num">View 6</span><h3 id="v6-title">Adding information, one step at a time</h3>
+      <p>Each step adds a feature to the model. Does the predicted price move closer to the real price, and where does it still miss?</p></div>
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn primary" id="v6-play">Play steps</button>
+        <button class="btn" id="v6-back" aria-label="Previous step">&minus; step</button>
+        <button class="btn" id="v6-fwd" aria-label="Next step">+ step</button>
+        <div class="group"><label for="v6-scrub">Step</label><input type="range" id="v6-scrub" min="0" max="6" step="1" value="6"><output id="v6-step-out"></output></div>
+        <div class="group">Cars
+          <div class="seg" role="group" aria-label="Cars shown"><button data-s="test">Held-out only</button><button data-s="all">All cars</button></div></div>
+      </div>
+      <div class="readouts" id="v6-tiles" style="margin:0 0 12px"></div>
+      <div class="three-up">
+        <div><p class="panel-title">Predicted vs actual price</p><p class="panel-sub">Closer to the diagonal is better.</p><div class="chart" id="v6-scatter"></div></div>
+        <div><p class="panel-title">Typical error by step</p><p class="panel-sub">Held-out RMSE, &pound;. Click a bar to jump there.</p><div class="chart" id="v6-steps"></div></div>
+        <div><p class="panel-title">Where it misses most</p><p class="panel-sub" id="v6-miss-sub"></p><div class="chart" id="v6-miss"></div></div>
+      </div>
+      <details class="table-view"><summary>Show the numbers as a table</summary><div class="tbl-scroll" id="v6-table"></div></details>
+    </div>
+    <div class="notes">
+      <div><h4>What it shows</h4><p>The same cars, scored by seven nested models. Step 0 guesses one price for every car; step 6 knows the age, mileage, engine, economy, tax, gearbox, fuel and model.</p></div>
+      <div><h4>How it is built</h4><p>Seven least-squares fits of ln(price) on the training 80% (Python, <code>prep/prepare_data.py</code>). The browser applies the saved coefficients to every row and scores any subset you filter.</p></div>
+      <div><h4>Why this form</h4><p>Predicted-vs-actual on held-out cars is the honest test. Bars give the size of the error; the ranked bars show which models are hardest to price.</p></div>
+    </div>
+  </section>
+
+  <div class="act"><h2>What the evidence says</h2></div>
+  <div class="insights" id="insights"></div>
+  <h3 style="margin:26px 0 6px;font-size:18px">What this analysis cannot tell you</h3>
+  <ul class="limits" id="limits"></ul>
+
+  <div class="act"><h2>How the data became these views</h2>
+    <p>Source, cleaning, model and verification, with the code that produced them.</p></div>
+  <div class="method" id="method"></div>
+
+</main>
+
+<footer>
+  <p><strong>Data:</strong> <a href="https://www.kaggle.com/datasets/adhurimquku/ford-car-price-prediction">Ford Car Price Prediction</a> (ford.csv, Kaggle, uploaded by adhurimquku).
+  The file does not state a currency or listing date; prices are shown in &pound; (UK-style road-tax bands) and age is measured from 2020, the newest model year in the file.</p>
+  <p><strong>Built with:</strong> D3 v7 and plain JavaScript for the app, Python (pandas, NumPy) for preparation and verification. AI assistance (Claude) was used to write code; all numbers were checked by <code>tests/verify.py</code>.</p>
+</footer>
+
+<div id="tip" role="tooltip"></div>
+
+<script src="data.js"></script>
+<script src="verification.js"></script>
+<script src="vendor/d3.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/v1_timeline.js"></script>
+<script src="js/v2_scatter3d.js"></script>
+<script src="js/v3_distributions.js"></script>
+<script src="js/v4_whatif.js"></script>
+<script src="js/v5_partial.js"></script>
+<script src="js/v6_evidence.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

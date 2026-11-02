@@ -1,0 +1,38 @@
+[
+  {
+    "step": "Raw file",
+    "rows_after": 17966,
+    "why": "ford.csv as downloaded: 17,966 rows x 9 columns, no empty cells",
+    "rows_removed": 0
+  },
+  {
+    "step": "Drop exact duplicates",
+    "rows_after": 17812,
+    "why": "all 9 columns identical -> almost certainly the same listing twice",
+    "rows_removed": 154
+  },
+  {
+    "step": "Drop year > 2020",
+    "rows_after": 17811,
+    "why": "one row has year 2060 (typo); the true year cannot be recovered",
+    "rows_removed": 1
+  },
+  {
+    "step": "Drop engineSize = 0",
+    "rows_after": 17760,
+    "why": "a car cannot have a 0.0 L engine: treated as missing and dropped (no imputation)",
+    "rows_removed": 51
+  },
+  {
+    "step": "Keep Petrol and Diesel only",
+    "rows_after": 17736,
+    "why": "Hybrid/Electric/Other have <=22 rows each and 'mpg' is not comparable (mpg up to 201.8)",
+    "rows_removed": 24
+  },
+  {
+    "step": "Drop models with < 30 rows",
+    "rows_after": 17715,
+    "why": "too few rows to estimate a price pattern: Escort, Fusion, Ranger, Streetka, Transit Tourneo",
+    "rows_removed": 21
+  }
+]
